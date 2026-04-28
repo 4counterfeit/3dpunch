@@ -1,8 +1,8 @@
 // --- CONFIGURATION ---
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbx4lP2WTbsrBvc2njF50Io3JamtuZMHaHPBITDtkpH9VQpAZYNHhAMqqWv_O8PevyVt/exec";
+  "https://script.google.com/macros/s/AKfycbwelitZ_VUiqmOlPk6n-JyRPxFr5PPJoX_z46FuNdYfAth9MmijK5zcg26RplCEc5BN/exec";
 
-// --- COMIC BOOK UI & BURST SCREEN INJECTION ---
+// --- COMIC BOOK UI & CUSTOM MODAL INJECTION ---
 const style = document.createElement("style");
 style.innerHTML = `
     @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
@@ -10,14 +10,68 @@ style.innerHTML = `
     body {
         font-family: 'Bangers', cursive;
         text-transform: uppercase;
+        margin: 0;
+        overflow: hidden;
     }
 
-    /* Comic Book Home Screen */
+    /* Custom Comic Modal */
+    #comic-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 5000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .comic-modal {
+        background: #fff;
+        border: 6px solid #000;
+        padding: 30px;
+        position: relative;
+        max-width: 85%;
+        text-align: center;
+        box-shadow: 15px 15px 0px #E23636;
+        transform: rotate(-1deg);
+    }
+
+    .comic-modal h2 {
+        font-size: 3rem;
+        color: #E23636;
+        margin: 0 0 10px 0;
+        -webkit-text-stroke: 1.5px black;
+    }
+
+    .comic-modal input {
+        font-family: 'Bangers', cursive;
+        font-size: 2rem;
+        width: 100%;
+        padding: 10px;
+        border: 4px solid black;
+        margin: 15px 0;
+        text-align: center;
+        text-transform: uppercase;
+        outline: none;
+        background: #f9f9f9;
+    }
+
+    .comic-modal .submit-btn {
+        background: #FFCC00;
+        font-family: 'Bangers', cursive;
+        font-size: 2.5rem;
+        padding: 10px 30px;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 5px 5px 0px black;
+    }
+
+    /* Start Screen */
     #start-screen {
-        background-color: #FFCC00 !important; /* Classic Comic Yellow */
+        background-color: #FFCC00 !important;
         background-image:
             radial-gradient(circle, rgba(0,0,0,0.1) 2px, transparent 2px),
-            conic-gradient(from 0deg at 50% 50%, #FFCC00 0deg, #FFCC00 15deg, #FFD700 15deg, #FFD700 30deg); /* Burst Effect */
+            conic-gradient(from 0deg at 50% 50%, #FFCC00 0deg, #FFCC00 15deg, #FFD700 15deg, #FFD700 30deg);
         background-size: 20px 20px, 100% 100%;
         display: flex;
         flex-direction: column;
@@ -28,99 +82,57 @@ style.innerHTML = `
         overflow: hidden;
     }
 
-    /* The Comic Starburst Background */
     #start-screen::before {
         content: '';
         position: absolute;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(
-            from 0deg,
-            #FFCC00 0%, #FFCC00 5%,
-            #FFD700 5%, #FFD700 10%,
-            #FFCC00 10%, #FFCC00 15%,
-            #FFD700 15%, #FFD700 20%
-        );
+        width: 200%; height: 200%;
+        background: conic-gradient(from 0deg, #FFCC00 0%, #FFCC00 5%, #FFD700 5%, #FFD700 10%, #FFCC00 10%, #FFCC00 15%, #FFD700 15%, #FFD700 20%);
         background-repeat: repeat;
         animation: rotateBurst 60s linear infinite;
         z-index: -1;
     }
 
-    @keyframes rotateBurst {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
+    @keyframes rotateBurst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     .epic-title {
         font-size: 8rem !important;
-        color: #E23636; /* Comic Red */
+        color: #E23636;
         -webkit-text-stroke: 4px black;
         text-shadow: 8px 8px 0px #000;
-        margin: 0;
-        line-height: 0.8;
-        letter-spacing: -2px;
+        margin: 0; line-height: 0.8; letter-spacing: -2px;
         transform: skew(-5deg, -5deg);
         animation: titlePop 0.5s ease-out;
     }
 
-    .epic-subtitle {
-        font-size: 2rem;
-        color: #fff;
-        background: #000;
-        padding: 5px 20px;
-        margin-top: 20px;
-        transform: rotate(2deg);
-        box-shadow: 5px 5px 0px #E23636;
+    .epic-rules {
+        background: white; color: black; padding: 20px; border: 4px solid black;
+        margin-top: 20px; font-size: 1.3rem; box-shadow: 10px 10px 0px black;
+        max-width: 400px; line-height: 1.2;
     }
 
-    .epic-rules {
-        background: white;
-        color: black;
-        padding: 20px;
-        border: 4px solid black;
-        margin-top: 30px;
+    .leaderboard-list {
+        margin-top: 15px;
+        border-top: 3px dashed #000;
+        padding-top: 10px;
+        color: #E23636;
         font-size: 1.5rem;
-        box-shadow: 10px 10px 0px black;
-        max-width: 400px;
-        line-height: 1.2;
     }
 
     .epic-btn {
-        margin-top: 40px;
-        background: #E23636;
-        color: white;
-        font-family: 'Bangers', cursive;
-        font-size: 4rem;
-        padding: 10px 50px;
-        border: 5px solid black;
-        cursor: pointer;
-        box-shadow: 8px 8px 0px black;
-        transition: transform 0.1s;
+        margin-top: 30px; background: #E23636; color: white;
+        font-family: 'Bangers', cursive; font-size: 4rem; padding: 10px 50px;
+        border: 5px solid black; cursor: pointer; box-shadow: 8px 8px 0px black;
     }
 
-    .epic-btn:hover {
-        transform: scale(1.1) rotate(-2deg);
-        background: #FFCC00;
-        color: black;
-    }
-
-    /* In-Game Sound Effects (Floating Text) */
     .hit-text {
-        position: fixed;
-        font-size: 5rem !important;
-        color: #FFCC00;
-        -webkit-text-stroke: 3px black;
-        text-shadow: 6px 6px 0px #000;
-        pointer-events: none;
-        z-index: 1000;
-        filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+        position: fixed; font-size: 5rem !important; color: #FFCC00;
+        -webkit-text-stroke: 3px black; text-shadow: 6px 6px 0px #000;
+        pointer-events: none; z-index: 1000;
     }
 
     #uiCoins {
-        font-size: 3rem !important;
-        color: #FFCC00 !important;
-        -webkit-text-stroke: 2px black;
-        text-shadow: 4px 4px 0px #000;
+        font-size: 3rem !important; color: #FFCC00 !important;
+        -webkit-text-stroke: 2px black; text-shadow: 4px 4px 0px #000;
     }
 
     @keyframes titlePop {
@@ -131,16 +143,29 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-// --- LEADERBOARD LOGIC ---
+// --- MODAL HTML INJECTION ---
+const modalDiv = document.createElement("div");
+modalDiv.id = "comic-modal-overlay";
+modalDiv.innerHTML = `
+    <div class="comic-modal">
+        <h2 id="modal-heading">K.O.!</h2>
+        <p style="font-size: 1.5rem; margin:0;" id="modal-subtext">SAVE YOUR SCORE, HERO!</p>
+        <input type="text" id="hero-name" maxlength="10" placeholder="NAME">
+        <br>
+        <button class="submit-btn" id="submit-score-btn">SAVE POW!</button>
+    </div>
+`;
+document.body.appendChild(modalDiv);
 
+// --- LEADERBOARD LOGIC ---
 async function loadLeaderboard() {
   try {
-    const response = await fetch(SCRIPT_URL);
+    const response = await fetch(SCRIPT_URL + "?nocache=" + Date.now());
     const top3 = await response.json();
     const rulesBox = document.querySelector(".epic-rules");
 
     if (top3 && top3.length > 0) {
-      let leaderHtml = `<div class="leaderboard-list" style="margin-top:15px; border-top:2px dashed black; padding-top:10px; color:#E23636;">`;
+      let leaderHtml = `<div class="leaderboard-list">`;
       leaderHtml += `<strong>WORLD LEADERS:</strong><br>`;
       top3.forEach((entry, i) => {
         leaderHtml += `${i + 1}. ${entry.name} - ${entry.score}<br>`;
@@ -149,39 +174,47 @@ async function loadLeaderboard() {
       rulesBox.innerHTML += leaderHtml;
     }
   } catch (e) {
-    console.log("Leaderboard fetch failed.");
+    console.log("Leaderboard: Waiting for first score submission.");
   }
 }
 
-async function checkWorldRecord(playerScore) {
-  if (playerScore <= 0) return;
-  try {
-    const response = await fetch(SCRIPT_URL);
-    const top3 = await response.json();
+function checkWorldRecord(playerScore) {
+  if (playerScore <= 0) {
+    location.reload();
+    return;
+  }
 
-    // Qualify if sheet is empty or beat the 3rd place score
-    const qualifies =
-      top3.length < 3 || playerScore > top3[top3.length - 1].score;
+  const overlay = document.getElementById("comic-modal-overlay");
+  const submitBtn = document.getElementById("submit-score-btn");
+  const nameInput = document.getElementById("hero-name");
+  const heading = document.getElementById("modal-heading");
 
-    if (qualifies) {
-      const name = prompt("WORLD CLASS! Enter your name for the Leaderboard:");
-      if (name) {
-        const cleanName = name.substring(0, 10).toUpperCase();
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: cleanName, score: playerScore }),
-        });
-        alert("POW! RECORD SAVED! Refresh to see the ranking.");
-        location.reload();
-      }
+  heading.innerText = "SCORE: " + playerScore;
+  overlay.style.display = "flex";
+
+  submitBtn.onclick = async () => {
+    const name = nameInput.value.trim().toUpperCase();
+    if (!name) return;
+
+    submitBtn.innerText = "SAVING...";
+    submitBtn.disabled = true;
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, score: playerScore }),
+      });
+      // Small delay so the user sees the button change before reload
+      setTimeout(() => location.reload(), 500);
+    } catch (e) {
+      location.reload();
     }
-  } catch (e) {
-    console.error("Leaderboard error:", e);
-  }
+  };
 }
 
+// --- INITIALIZE UI ---
 const isMobileDevice =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent,
@@ -190,7 +223,6 @@ const isMobileDevice =
   navigator.maxTouchPoints > 0;
 const controlText = isMobileDevice ? "THRUST TO STRIKE!" : "CLICK TO STRIKE!";
 
-// Rewrite the Start Screen HTML entirely
 const startScreenEl = document.getElementById("start-screen");
 if (startScreenEl) {
   startScreenEl.innerHTML = `
@@ -207,7 +239,7 @@ if (startScreenEl) {
   loadLeaderboard();
 }
 
-// --- GAME STATE VARIABLES ---
+// --- CORE GAME ENGINE ---
 let score = 0;
 let isGameOver = true;
 let bagState = "neutral";
@@ -222,10 +254,7 @@ const PUNCH_COOLDOWN = 200;
 
 const uiCoins = document.getElementById("uiCoins");
 const dangerFill = document.getElementById("danger-bar-fill");
-const shopBtn = document.getElementById("shop-btn");
-if (shopBtn) shopBtn.style.display = "none";
 
-// --- THREE.JS SETUP ---
 const container = document.getElementById("canvas-container");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x2c3e50);
@@ -255,7 +284,7 @@ spotLight.penumbra = 0.5;
 spotLight.castShadow = true;
 scene.add(spotLight);
 
-// --- GYM ENVIRONMENT ---
+// Environment
 const floorGeo = new THREE.PlaneGeometry(120, 120);
 const floorMat = new THREE.MeshToonMaterial({ color: 0xd35400 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -277,7 +306,7 @@ const track = new THREE.Mesh(trackGeo, trackMat);
 track.position.set(0, 12.5, 10);
 scene.add(track);
 
-// --- THE PUNCHING BAG ---
+// The Bag
 const pivot = new THREE.Group();
 pivot.position.y = 12;
 scene.add(pivot);
@@ -323,7 +352,7 @@ botHemi.position.y = -3.5;
 
 bagGroup.add(bodyMesh, topHemi, botHemi);
 
-// --- GLOVES ---
+// Gloves
 const leftGlove = new THREE.Group();
 const rightGlove = new THREE.Group();
 const leftRest = new THREE.Vector3(-2.8, -5.5, -10);
@@ -355,7 +384,6 @@ function createGloveMesh(mat, isLeft) {
 leftGlove.add(createGloveMesh(leftGloveMat, true));
 rightGlove.add(createGloveMesh(rightGloveMat, false));
 
-// --- MOTION CONTROL ---
 function handleMotion(event) {
   if (isGameOver) return;
   let accZ = event.acceleration.z;
@@ -370,7 +398,6 @@ function handleMotion(event) {
   }
 }
 
-// --- CONTROLS ---
 window.initGame = async function () {
   isGameOver = false;
   document.getElementById("start-screen").style.display = "none";
@@ -390,9 +417,8 @@ window.initGame = async function () {
   ) {
     try {
       const permissionState = await DeviceMotionEvent.requestPermission();
-      if (permissionState === "granted") {
+      if (permissionState === "granted")
         window.addEventListener("devicemotion", handleMotion);
-      }
     } catch (error) {}
   } else if (isMobileDevice) {
     window.addEventListener("devicemotion", handleMotion);
@@ -402,16 +428,8 @@ window.initGame = async function () {
 function triggerGameOver() {
   isGameOver = true;
   window.removeEventListener("devicemotion", handleMotion);
-  document.getElementById("final-score").innerText = score + " POWS!";
-  document.getElementById("game-over-screen").style.display = "flex";
-
   checkWorldRecord(score);
 }
-
-window.restartGame = function () {
-  initGame();
-  document.getElementById("game-over-screen").style.display = "none";
-};
 
 function updateDangerBar() {
   let p = (bagZ / MAX_Z) * 100;
@@ -516,7 +534,6 @@ function manageBagAI() {
   }
 }
 
-// --- RENDER LOOP ---
 let velX = 0,
   velZ = 0,
   spring = 0.05,
@@ -567,7 +584,8 @@ window.addEventListener("pointerdown", (e) => {
   if (
     !isGameOver &&
     e.target.tagName !== "BUTTON" &&
-    !e.target.closest("#start-screen")
+    !e.target.closest("#start-screen") &&
+    !e.target.closest(".comic-modal")
   ) {
     triggerPunchAnim(
       e.clientX < window.innerWidth / 2 ? "left" : "right",
