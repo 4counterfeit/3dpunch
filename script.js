@@ -1,448 +1,249 @@
-// --- CONFIGURATION ---
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwelitZ_VUiqmOlPk6n-JyRPxFr5PPJoX_z46FuNdYfAth9MmijK5zcg26RplCEc5BN/exec";
-const _SEC_K = "SUPER_SECRET_PUNCH_123"; // Handshake key
-
-// --- COMIC BOOK UI & CUSTOM MODAL INJECTION ---
+// --- COMIC BOOK UI STYLES ---
 const style = document.createElement("style");
 style.innerHTML = `
     @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
-    body { font-family: 'Bangers', cursive; text-transform: uppercase; margin: 0; overflow: hidden; }
-    #comic-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
-    .comic-modal { background: #fff; border: 6px solid #000; padding: 30px; position: relative; max-width: 85%; text-align: center; box-shadow: 15px 15px 0px #E23636; transform: rotate(-1deg); }
-    .comic-modal h2 { font-size: 3.5rem; color: #E23636; margin: 0 0 10px 0; -webkit-text-stroke: 1.5px black; }
-    .comic-modal input { font-family: 'Bangers', cursive; font-size: 2rem; width: 100%; padding: 10px; border: 4px solid black; margin: 15px 0; text-align: center; text-transform: uppercase; outline: none; background: #f9f9f9; }
-    .comic-modal .submit-btn { background: #FFCC00; font-family: 'Bangers', cursive; font-size: 2.5rem; padding: 10px 30px; border: 4px solid black; cursor: pointer; box-shadow: 5px 5px 0px black; }
-    #start-screen { background-color: #FFCC00 !important; background-image: radial-gradient(circle, rgba(0,0,0,0.1) 2px, transparent 2px), conic-gradient(from 0deg at 50% 50%, #FFCC00 0deg, #FFCC00 15deg, #FFD700 15deg, #FFD700 30deg); background-size: 20px 20px, 100% 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 2000; overflow: hidden; }
-    #start-screen::before { content: ''; position: absolute; width: 200%; height: 200%; background: conic-gradient(from 0deg, #FFCC00 0%, #FFCC00 5%, #FFD700 5%, #FFD700 10%, #FFCC00 10%, #FFCC00 15%, #FFD700 15%, #FFD700 20%); background-repeat: repeat; animation: rotateBurst 60s linear infinite; z-index: -1; }
-    @keyframes rotateBurst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .epic-title { font-size: 8rem !important; color: #E23636; -webkit-text-stroke: 4px black; text-shadow: 8px 8px 0px #000; margin: 0; line-height: 0.8; letter-spacing: -2px; transform: skew(-5deg, -5deg); animation: titlePop 0.5s ease-out; }
-    .epic-rules { background: white; color: black; padding: 20px; border: 4px solid black; margin-top: 20px; font-size: 1.3rem; box-shadow: 10px 10px 0px black; max-width: 400px; line-height: 1.2; }
-    .leaderboard-list { margin-top: 15px; border-top: 3px dashed #000; padding-top: 10px; color: #E23636; font-size: 1.5rem; }
-    .epic-btn { margin-top: 30px; background: #E23636; color: white; font-family: 'Bangers', cursive; font-size: 4rem; padding: 10px 50px; border: 5px solid black; cursor: pointer; box-shadow: 8px 8px 0px black; }
-    .hit-text { position: fixed; font-size: 5rem !important; color: #FFCC00; -webkit-text-stroke: 3px black; text-shadow: 6px 6px 0px #000; pointer-events: none; z-index: 1000; }
-    #uiCoins { font-size: 3rem !important; color: #FFCC00 !important; -webkit-text-stroke: 2px black; text-shadow: 4px 4px 0px #000; }
-    @keyframes titlePop { 0% { transform: scale(0) rotate(-20deg); } 80% { transform: scale(1.1) rotate(5deg); } 100% { transform: scale(1) skew(-5deg, -5deg); } }
+
+    body {
+        font-family: 'Bangers', cursive;
+        text-transform: uppercase;
+        margin: 0;
+        overflow: hidden;
+        background: #2c3e50;
+    }
+
+    #start-screen {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #FFCC00;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        z-index: 2000;
+    }
+
+    .epic-title {
+        font-size: 8rem;
+        color: #E23636;
+        -webkit-text-stroke: 4px black;
+        text-shadow: 8px 8px 0px #000;
+        margin: 0;
+        transform: skew(-5deg, -5deg);
+    }
+
+    .epic-btn {
+        margin-top: 30px;
+        background: #E23636;
+        color: white;
+        font-family: 'Bangers', cursive;
+        font-size: 4rem;
+        padding: 10px 50px;
+        border: 5px solid black;
+        cursor: pointer;
+        box-shadow: 8px 8px 0px black;
+    }
+
+    #uiScore {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 4rem;
+        color: #FFCC00;
+        -webkit-text-stroke: 2px black;
+        text-shadow: 4px 4px 0px #000;
+        z-index: 100;
+        pointer-events: none;
+    }
+
+    .hit-text {
+        position: fixed;
+        font-size: 5rem;
+        color: #FFCC00;
+        -webkit-text-stroke: 3px black;
+        text-shadow: 6px 6px 0px #000;
+        pointer-events: none;
+        z-index: 1000;
+        transition: transform 0.5s, opacity 0.5s;
+    }
+
+    #game-over {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9);
+        color: white;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 5000;
+    }
 `;
 document.head.appendChild(style);
 
-const modalDiv = document.createElement("div");
-modalDiv.id = "comic-modal-overlay";
-modalDiv.innerHTML = `<div class="comic-modal"><h2 id="modal-heading">K.O.!</h2><p style="font-size: 1.5rem; margin:0;" id="modal-subtext">SAVE YOUR SCORE, HERO!</p><input type="text" id="hero-name" maxlength="10" placeholder="NAME"><br><button class="submit-btn" id="submit-score-btn">SAVE POW!</button></div>`;
-document.body.appendChild(modalDiv);
+// --- UI ELEMENTS ---
+const startScreen = document.createElement("div");
+startScreen.id = "start-screen";
+startScreen.innerHTML = `
+    <h1 class="epic-title">3D PUNCH</h1>
+    <button class="epic-btn" onclick="initGame()">FIGHT!</button>
+`;
+document.body.appendChild(startScreen);
 
-// --- STATE & SECURITY VARIABLES ---
-let _s = 0,
-  _v_t = 0; // score and start time
-let isGameOver = true,
-  bagState = "neutral",
-  stateTimer = 0;
-let _d = 1.0,
-  isStumbled = false,
-  bagZ = 0;
+const uiScore = document.createElement("div");
+uiScore.id = "uiScore";
+uiScore.innerText = "0";
+document.body.appendChild(uiScore);
+
+const gameOverScreen = document.createElement("div");
+gameOverScreen.id = "game-over";
+gameOverScreen.innerHTML = `
+    <h1 class="epic-title">K.O.</h1>
+    <h2 id="final-score-text" style="font-size: 3rem;">SCORE: 0</h2>
+    <button class="epic-btn" onclick="location.reload()">RETRY?</button>
+`;
+document.body.appendChild(gameOverScreen);
+
+// --- GAME LOGIC & THREE.JS ---
+let score = 0, isGameOver = true, bagZ = 0, difficulty = 1.0;
+let bagState = "neutral", stateTimer = 0;
 const MAX_Z = 25;
-let nextPunchIsLeft = true,
-  lastPunchTime = 0;
-const PUNCH_COOLDOWN = 200;
 
-// --- LEADERBOARD LOGIC ---
-async function loadLeaderboard() {
-  try {
-    const response = await fetch(SCRIPT_URL + "?nocache=" + Date.now());
-    const top3 = await response.json();
-    const rulesBox = document.querySelector(".epic-rules");
-    if (top3 && top3.length > 0) {
-      const container = document.createElement("div");
-      container.className = "leaderboard-list";
-      container.innerHTML = "<strong>WORLD LEADERS:</strong><br>";
-      top3.forEach((entry, i) => {
-        const row = document.createElement("div");
-        row.textContent = `${i + 1}. ${entry.name} - ${entry.score}`; // SECURITY: textContent prevents button injection
-        container.appendChild(row);
-      });
-      rulesBox.appendChild(container);
-    }
-  } catch (e) {
-    console.log("Board loading...");
-  }
-}
-
-function checkWorldRecord(playerScore) {
-  if (playerScore <= 0) {
-    location.reload();
-    return;
-  }
-  document.getElementById("modal-heading").innerText = "SCORE: " + playerScore;
-  document.getElementById("comic-modal-overlay").style.display = "flex";
-
-  document.getElementById("submit-score-btn").onclick = async () => {
-    const name = document
-      .getElementById("hero-name")
-      .value.trim()
-      .toUpperCase();
-    if (!name) return;
-    document.getElementById("submit-score-btn").innerText = "SAVING...";
-    document.getElementById("submit-score-btn").disabled = true;
-    try {
-      await fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({
-          name: name,
-          score: playerScore,
-          startTime: _v_t,
-          key: _SEC_K,
-        }),
-      });
-      setTimeout(() => location.reload(), 500);
-    } catch (e) {
-      location.reload();
-    }
-  };
-}
-
-// --- INITIALIZE UI ---
-const isMobileDevice =
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  ) ||
-  "ontouchstart" in window ||
-  navigator.maxTouchPoints > 0;
-const controlText = isMobileDevice ? "THRUST TO STRIKE!" : "CLICK TO STRIKE!";
-const startScreenEl = document.getElementById("start-screen");
-if (startScreenEl) {
-  startScreenEl.innerHTML = `<h1 class="epic-title">3D<br>PUNCH</h1><div class="epic-rules"><span style="color: #2979FF;">●</span> BLUE: NEUTRAL<br><span style="color: #FFCC00;">●</span> YELLOW: <strong style="text-decoration: underline;">STOP!</strong><br><span style="color: #E23636;">●</span> RED: <strong>COUNTER NOW!</strong><br><br><small style="font-size: 1rem;">${controlText}</small></div><button class="epic-btn" onclick="initGame()">POW!</button>`;
-  loadLeaderboard();
-}
-
-// --- THREE.JS ENGINE ---
-const uiCoins = document.getElementById("uiCoins");
-const dangerFill = document.getElementById("danger-bar-fill");
-const container = document.getElementById("canvas-container");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x2c3e50);
-scene.fog = new THREE.Fog(0x2c3e50, 30, 80);
-const camera = new THREE.PerspectiveCamera(
-  85,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000,
-);
+const camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, -2, 38);
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-container.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-const spotLight = new THREE.SpotLight(0xffffff, 1);
-spotLight.position.set(0, 30, 20);
-spotLight.angle = Math.PI / 4;
-spotLight.penumbra = 0.5;
-spotLight.castShadow = true;
-scene.add(spotLight);
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const light = new THREE.DirectionalLight(0xffffff, 0.8);
+light.position.set(5, 10, 7);
+scene.add(light);
 
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(120, 120),
-  new THREE.MeshToonMaterial({ color: 0xd35400 }),
-);
-floor.rotation.x = -Math.PI / 2;
-floor.position.y = -15;
-floor.receiveShadow = true;
-scene.add(floor);
-
-const wall = new THREE.Mesh(
-  new THREE.PlaneGeometry(120, 60),
-  new THREE.MeshToonMaterial({ color: 0x7f8c8d }),
-);
-wall.position.set(0, 10, -30);
-scene.add(wall);
-
-const track = new THREE.Mesh(
-  new THREE.BoxGeometry(2, 0.5, 60),
-  new THREE.MeshToonMaterial({ color: 0x555555 }),
-);
-track.position.set(0, 12.5, 10);
-scene.add(track);
-
+// The Punching Bag
 const pivot = new THREE.Group();
 pivot.position.y = 12;
 scene.add(pivot);
-const rope = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.1, 0.1, 8, 8),
-  new THREE.MeshToonMaterial({ color: 0x222222 }),
-);
-rope.position.y = -4;
-pivot.add(rope);
 
 const bagGroup = new THREE.Group();
 bagGroup.position.y = -13;
 pivot.add(bagGroup);
+
 const bagMat = new THREE.MeshToonMaterial({ color: 0x3498db });
-const bodyMesh = new THREE.Mesh(
-  new THREE.CylinderGeometry(3, 3, 7, 16),
-  bagMat,
-);
-bodyMesh.castShadow = true;
-const topHemi = new THREE.Mesh(
-  new THREE.SphereGeometry(3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-  bagMat,
-);
-topHemi.position.y = 3.5;
-const botHemi = new THREE.Mesh(
-  new THREE.SphereGeometry(3, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
-  bagMat,
-);
-botHemi.position.y = -3.5;
-bagGroup.add(bodyMesh, topHemi, botHemi);
+const body = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 8, 20), bagMat);
+const top = new THREE.Mesh(new THREE.SphereGeometry(3, 20, 20), bagMat);
+top.position.y = 4;
+const bot = new THREE.Mesh(new THREE.SphereGeometry(3, 20, 20), bagMat);
+bot.position.y = -4;
+bagGroup.add(body, top, bot);
 
-const leftGlove = new THREE.Group(),
-  rightGlove = new THREE.Group();
-const leftRest = new THREE.Vector3(-2.8, -5.5, -10),
-  rightRest = new THREE.Vector3(2.8, -5.5, -10);
-leftGlove.position.copy(leftRest);
-rightGlove.position.copy(rightRest);
-camera.add(leftGlove);
-camera.add(rightGlove);
-scene.add(camera);
+// Gloves
+const leftGlove = new THREE.Group();
+const rightGlove = new THREE.Group();
+const gloveMat = new THREE.MeshToonMaterial({ color: 0xe23636 });
+const gloveMesh = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), gloveMat);
+gloveMesh.scale.set(1, 1.2, 1.4);
 
-function createGloveMesh(isLeft) {
-  const group = new THREE.Group();
-  const mat = new THREE.MeshToonMaterial({ color: 0xe74c3c });
-  const fist = new THREE.Mesh(new THREE.SphereGeometry(1.8, 16, 16), mat);
-  fist.scale.set(1, 1.2, 1.3);
-  const cuff = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.5, 2, 16), mat);
-  cuff.position.set(0, -2, 0);
-  const thumb = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), mat);
-  thumb.scale.set(1, 1.4, 1);
-  thumb.position.set(isLeft ? 1.4 : -1.4, -0.2, 0.8);
-  thumb.rotation.z = isLeft ? -0.4 : 0.4;
-  group.add(fist, cuff, thumb);
-  return group;
-}
-leftGlove.add(createGloveMesh(true));
-rightGlove.add(createGloveMesh(false));
+leftGlove.add(gloveMesh.clone());
+rightGlove.add(gloveMesh.clone());
+leftGlove.position.set(-4, -6, 25);
+rightGlove.position.set(4, -6, 25);
+scene.add(leftGlove, rightGlove);
 
-function handleMotion(event) {
-  if (isGameOver) return;
-  let accZ = event.acceleration.z;
-  if (accZ === null) return;
-  let now = Date.now();
-  if (Math.abs(accZ) > 8) {
-    if (now - lastPunchTime < PUNCH_COOLDOWN) return;
-    let side = nextPunchIsLeft ? "left" : "right";
-    nextPunchIsLeft = !nextPunchIsLeft;
-    triggerPunchAnim(side, window.innerWidth / 2, window.innerHeight / 2);
-    lastPunchTime = now;
-  }
-}
-
-window.initGame = async function () {
-  isGameOver = false;
-  bagZ = 0;
-  _s = 0;
-  _d = 1.0;
-  _v_t = Date.now();
-  bagState = "neutral";
-  isStumbled = false;
-  stateTimer = Date.now() + 1500;
-  uiCoins.innerText = "SCORE: 0";
-  document.getElementById("start-screen").style.display = "none";
-  updateDangerBar();
-  if (
-    isMobileDevice &&
-    typeof DeviceMotionEvent !== "undefined" &&
-    typeof DeviceMotionEvent.requestPermission === "function"
-  ) {
-    try {
-      const p = await DeviceMotionEvent.requestPermission();
-      if (p === "granted")
-        window.addEventListener("devicemotion", handleMotion);
-    } catch (e) {}
-  } else if (isMobileDevice) {
-    window.addEventListener("devicemotion", handleMotion);
-  }
+// --- FUNCTIONS ---
+window.initGame = () => {
+    isGameOver = false;
+    startScreen.style.display = "none";
+    animate();
 };
 
-function triggerGameOver() {
-  isGameOver = true;
-  window.removeEventListener("devicemotion", handleMotion);
-  checkWorldRecord(_s);
-}
-function updateDangerBar() {
-  let p = (bagZ / MAX_Z) * 100;
-  dangerFill.style.width = Math.min(p, 100) + "%";
-  dangerFill.style.background =
-    p > 80 ? "#E23636" : p > 50 ? "#FFCC00" : "#2ecc71";
-}
-
-function triggerPunchAnim(side, clientX, clientY) {
-  if (isPunching || isStumbled) return;
-  isPunching = true;
-  punchProgress = 0;
-  activeGlove = side === "left" ? leftGlove : rightGlove;
-  let dz = -20 + bagZ;
-  if (side === "left") {
-    punchTarget.set(1.5, 2, dz);
-    targetPunchRot.set(0.5, -0.5, Math.PI / 3);
-    velX += 0.4;
-    velZ -= 0.3;
-  } else {
-    punchTarget.set(-1.5, 2, dz);
-    targetPunchRot.set(0.5, 0.5, -Math.PI / 3);
-    velX -= 0.4;
-    velZ -= 0.3;
-  }
-  setTimeout(() => checkHit(clientX, clientY), 120);
+function spawnText(msg, x, y) {
+    const t = document.createElement("div");
+    t.className = "hit-text";
+    t.innerText = msg;
+    t.style.left = x + "px";
+    t.style.top = y + "px";
+    document.body.appendChild(t);
+    setTimeout(() => {
+        t.style.transform = "translateY(-100px) scale(1.5)";
+        t.style.opacity = "0";
+    }, 50);
+    setTimeout(() => t.remove(), 600);
 }
 
-function checkHit(clientX, clientY) {
-  if (isGameOver) return;
-  scaleTarget = 0.6;
-  if (bagState === "attack") {
-    _s++;
-    uiCoins.innerText = "SCORE: " + _s;
-    bagZ -= 13;
-    bagState = "stunned";
-    stateTimer = Date.now() + 600;
-    bagMat.color.setHex(0xffffff);
-    spawnText("BOOM!", "#FFCC00", clientX, clientY);
-    _d += 0.15;
-  } else if (bagState === "warning") {
-    bagZ += 9;
-    isStumbled = true;
-    spawnText("UGH!", "#E23636", clientX, clientY);
-    setTimeout(() => (isStumbled = false), 1000);
-  } else if (bagState === "neutral") {
-    bagZ -= 0.5;
-    spawnText("BAP", "#fff", clientX, clientY);
-  } else if (bagState === "stunned") {
-    bagZ -= 2;
-    spawnText("WACK!", "#FFCC00", clientX, clientY);
-  }
-  if (bagZ < 0) bagZ = 0;
+function punch(x) {
+    if (isGameOver) return;
+    
+    // Simple Glove Animation
+    const glove = x < window.innerWidth / 2 ? leftGlove : rightGlove;
+    const originalZ = glove.position.z;
+    glove.position.z -= 10;
+    setTimeout(() => glove.position.z = originalZ, 100);
+
+    if (bagState === "attack") {
+        score++;
+        uiScore.innerText = score;
+        bagZ -= 12;
+        bagState = "stunned";
+        stateTimer = Date.now() + 500;
+        bagMat.color.setHex(0xffffff);
+        difficulty += 0.1;
+        spawnText("POW!", x, window.innerHeight / 2);
+    } else {
+        bagZ += 4;
+        spawnText("MISS!", x, window.innerHeight / 2);
+    }
 }
 
-function spawnText(msg, color, clientX, clientY) {
-  const text = document.createElement("div");
-  text.className = "hit-text";
-  text.innerText = msg;
-  text.style.color = color;
-  const tilt = Math.random() * 40 - 20;
-  text.style.transform = `rotate(${tilt}deg) scale(0.5)`;
-  text.style.left = `${clientX - 50}px`;
-  text.style.top = `${clientY - 100}px`;
-  document.body.appendChild(text);
-  setTimeout(() => {
-    text.style.top = `${clientY - 200}px`;
-    text.style.transform = `rotate(${tilt + 10}deg) scale(1.5)`;
-    text.style.opacity = "0";
-  }, 50);
-  setTimeout(() => text.remove(), 600);
-}
+function animate() {
+    if (isGameOver) return;
+    requestAnimationFrame(animate);
 
-function manageBagAI() {
-  let now = Date.now();
-  if (bagState === "neutral") {
-    bagZ += 0.025 * _d;
-    bagMat.color.setHex(0x3498db);
-    if (now > stateTimer) {
-      bagState = "warning";
-      bagMat.color.setHex(0xf1c40f);
-      stateTimer = now + Math.max(350, 800 - _s * 20);
-    }
-  } else if (bagState === "warning") {
-    if (now > stateTimer) {
-      bagState = "attack";
-      bagMat.color.setHex(0xe74c3c);
-      stateTimer = now + Math.max(250, 600 - _s * 15);
-    }
-  } else if (bagState === "attack") {
-    bagZ += 0.5 * _d;
-    if (now > stateTimer) {
-      bagState = "neutral";
-      stateTimer = now + 1000 + Math.random() * 2000;
-    }
-  } else if (bagState === "stunned") {
-    if (now > stateTimer) {
-      bagState = "neutral";
-      stateTimer = now + 500;
-    }
-  }
-}
+    let now = Date.now();
 
-// 60 FPS Engine Variables
-let lastFrameTime = 0;
-const fpsInterval = 1000 / 60;
-let velX = 0,
-  velZ = 0,
-  spring = 0.05,
-  friction = 0.92,
-  scaleTarget = 1;
-let activeGlove = null,
-  punchProgress = 0,
-  punchTarget = new THREE.Vector3(),
-  targetPunchRot = new THREE.Vector3(),
-  isPunching = false;
+    // AI Logic
+    if (bagState === "neutral") {
+        bagZ += 0.05 * difficulty;
+        bagMat.color.setHex(0x3498db);
+        if (now > stateTimer) {
+            bagState = "warning";
+            stateTimer = now + 800;
+        }
+    } else if (bagState === "warning") {
+        bagMat.color.setHex(0xffcc00);
+        if (now > stateTimer) {
+            bagState = "attack";
+            stateTimer = now + 600;
+        }
+    } else if (bagState === "attack") {
+        bagZ += 0.4 * difficulty;
+        bagMat.color.setHex(0xe23636);
+        if (now > stateTimer) {
+            bagState = "neutral";
+            stateTimer = now + 1000;
+        }
+    } else if (bagState === "stunned" && now > stateTimer) {
+        bagState = "neutral";
+    }
 
-function animate(currentTime) {
-  requestAnimationFrame(animate);
-  const deltaTime = currentTime - lastFrameTime;
-  if (deltaTime > fpsInterval) {
-    lastFrameTime = currentTime - (deltaTime % fpsInterval);
-    if (!isGameOver) {
-      manageBagAI();
-      pivot.position.z = bagZ;
-      updateDangerBar();
-      if (bagZ >= MAX_Z) triggerGameOver();
+    pivot.position.z = bagZ;
+
+    if (bagZ >= MAX_Z) {
+        isGameOver = true;
+        document.getElementById("final-score-text").innerText = "SCORE: " + score;
+        gameOverScreen.style.display = "flex";
     }
-    if (isPunching && activeGlove) {
-      punchProgress += 0.15;
-      let restPos = activeGlove === leftGlove ? leftRest : rightRest;
-      if (punchProgress <= 1.0) {
-        let t = Math.sin(punchProgress * Math.PI);
-        activeGlove.position.lerpVectors(restPos, punchTarget, t);
-        activeGlove.rotation.x = targetPunchRot.x * t;
-      } else {
-        activeGlove.position.copy(restPos);
-        activeGlove.rotation.set(0, 0, 0);
-        isPunching = false;
-      }
-    }
-    velX += (0 - pivot.rotation.x) * spring;
-    velZ += (0 - pivot.rotation.z) * spring;
-    velX *= friction;
-    velZ *= friction;
-    pivot.rotation.x += velX;
-    pivot.rotation.z += velZ;
-    scaleTarget += (1 - scaleTarget) * 0.2;
-    bagGroup.scale.set(
-      1 + (1 - scaleTarget) * 0.5,
-      scaleTarget,
-      1 + (1 - scaleTarget) * 0.5,
-    );
+
     renderer.render(scene, camera);
-  }
 }
-requestAnimationFrame(animate);
 
-window.addEventListener("pointerdown", (e) => {
-  if (
-    !isGameOver &&
-    e.target.tagName !== "BUTTON" &&
-    !e.target.closest("#start-screen") &&
-    !e.target.closest(".comic-modal")
-  ) {
-    triggerPunchAnim(
-      e.clientX < window.innerWidth / 2 ? "left" : "right",
-      e.clientX,
-      e.clientY,
-    );
-  }
-});
-
+window.addEventListener("pointerdown", (e) => punch(e.clientX));
 window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
