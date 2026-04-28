@@ -1,159 +1,49 @@
 // --- CONFIGURATION ---
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwelitZ_VUiqmOlPk6n-JyRPxFr5PPJoX_z46FuNdYfAth9MmijK5zcg26RplCEc5BN/exec";
+const _SEC_K = "SUPER_SECRET_PUNCH_123"; // Handshake key
 
 // --- COMIC BOOK UI & CUSTOM MODAL INJECTION ---
 const style = document.createElement("style");
 style.innerHTML = `
     @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
-
-    body {
-        font-family: 'Bangers', cursive;
-        text-transform: uppercase;
-        margin: 0;
-        overflow: hidden;
-    }
-
-    #comic-modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.85);
-        z-index: 5000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .comic-modal {
-        background: #fff;
-        border: 6px solid #000;
-        padding: 30px;
-        position: relative;
-        max-width: 85%;
-        text-align: center;
-        box-shadow: 15px 15px 0px #E23636;
-        transform: rotate(-1deg);
-    }
-
-    .comic-modal h2 {
-        font-size: 3.5rem;
-        color: #E23636;
-        margin: 0 0 10px 0;
-        -webkit-text-stroke: 1.5px black;
-    }
-
-    .comic-modal input {
-        font-family: 'Bangers', cursive;
-        font-size: 2rem;
-        width: 100%;
-        padding: 10px;
-        border: 4px solid black;
-        margin: 15px 0;
-        text-align: center;
-        text-transform: uppercase;
-        outline: none;
-        background: #f9f9f9;
-    }
-
-    .comic-modal .submit-btn {
-        background: #FFCC00;
-        font-family: 'Bangers', cursive;
-        font-size: 2.5rem;
-        padding: 10px 30px;
-        border: 4px solid black;
-        cursor: pointer;
-        box-shadow: 5px 5px 0px black;
-    }
-
-    #start-screen {
-        background-color: #FFCC00 !important;
-        background-image:
-            radial-gradient(circle, rgba(0,0,0,0.1) 2px, transparent 2px),
-            conic-gradient(from 0deg at 50% 50%, #FFCC00 0deg, #FFCC00 15deg, #FFD700 15deg, #FFD700 30deg);
-        background-size: 20px 20px, 100% 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        z-index: 2000;
-        overflow: hidden;
-    }
-
-    #start-screen::before {
-        content: '';
-        position: absolute;
-        width: 200%; height: 200%;
-        background: conic-gradient(from 0deg, #FFCC00 0%, #FFCC00 5%, #FFD700 5%, #FFD700 10%, #FFCC00 10%, #FFCC00 15%, #FFD700 15%, #FFD700 20%);
-        background-repeat: repeat;
-        animation: rotateBurst 60s linear infinite;
-        z-index: -1;
-    }
-
+    body { font-family: 'Bangers', cursive; text-transform: uppercase; margin: 0; overflow: hidden; }
+    #comic-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
+    .comic-modal { background: #fff; border: 6px solid #000; padding: 30px; position: relative; max-width: 85%; text-align: center; box-shadow: 15px 15px 0px #E23636; transform: rotate(-1deg); }
+    .comic-modal h2 { font-size: 3.5rem; color: #E23636; margin: 0 0 10px 0; -webkit-text-stroke: 1.5px black; }
+    .comic-modal input { font-family: 'Bangers', cursive; font-size: 2rem; width: 100%; padding: 10px; border: 4px solid black; margin: 15px 0; text-align: center; text-transform: uppercase; outline: none; background: #f9f9f9; }
+    .comic-modal .submit-btn { background: #FFCC00; font-family: 'Bangers', cursive; font-size: 2.5rem; padding: 10px 30px; border: 4px solid black; cursor: pointer; box-shadow: 5px 5px 0px black; }
+    #start-screen { background-color: #FFCC00 !important; background-image: radial-gradient(circle, rgba(0,0,0,0.1) 2px, transparent 2px), conic-gradient(from 0deg at 50% 50%, #FFCC00 0deg, #FFCC00 15deg, #FFD700 15deg, #FFD700 30deg); background-size: 20px 20px, 100% 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 2000; overflow: hidden; }
+    #start-screen::before { content: ''; position: absolute; width: 200%; height: 200%; background: conic-gradient(from 0deg, #FFCC00 0%, #FFCC00 5%, #FFD700 5%, #FFD700 10%, #FFCC00 10%, #FFCC00 15%, #FFD700 15%, #FFD700 20%); background-repeat: repeat; animation: rotateBurst 60s linear infinite; z-index: -1; }
     @keyframes rotateBurst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .epic-title {
-        font-size: 8rem !important;
-        color: #E23636;
-        -webkit-text-stroke: 4px black;
-        text-shadow: 8px 8px 0px #000;
-        margin: 0; line-height: 0.8; letter-spacing: -2px;
-        transform: skew(-5deg, -5deg);
-        animation: titlePop 0.5s ease-out;
-    }
-
-    .epic-rules {
-        background: white; color: black; padding: 20px; border: 4px solid black;
-        margin-top: 20px; font-size: 1.3rem; box-shadow: 10px 10px 0px black;
-        max-width: 400px; line-height: 1.2;
-    }
-
-    .leaderboard-list {
-        margin-top: 15px;
-        border-top: 3px dashed #000;
-        padding-top: 10px;
-        color: #E23636;
-        font-size: 1.5rem;
-    }
-
-    .epic-btn {
-        margin-top: 30px; background: #E23636; color: white;
-        font-family: 'Bangers', cursive; font-size: 4rem; padding: 10px 50px;
-        border: 5px solid black; cursor: pointer; box-shadow: 8px 8px 0px black;
-    }
-
-    .hit-text {
-        position: fixed; font-size: 5rem !important; color: #FFCC00;
-        -webkit-text-stroke: 3px black; text-shadow: 6px 6px 0px #000;
-        pointer-events: none; z-index: 1000;
-    }
-
-    #uiCoins {
-        font-size: 3rem !important; color: #FFCC00 !important;
-        -webkit-text-stroke: 2px black; text-shadow: 4px 4px 0px #000;
-    }
-
-    @keyframes titlePop {
-        0% { transform: scale(0) rotate(-20deg); }
-        80% { transform: scale(1.1) rotate(5deg); }
-        100% { transform: scale(1) skew(-5deg, -5deg); }
-    }
+    .epic-title { font-size: 8rem !important; color: #E23636; -webkit-text-stroke: 4px black; text-shadow: 8px 8px 0px #000; margin: 0; line-height: 0.8; letter-spacing: -2px; transform: skew(-5deg, -5deg); animation: titlePop 0.5s ease-out; }
+    .epic-rules { background: white; color: black; padding: 20px; border: 4px solid black; margin-top: 20px; font-size: 1.3rem; box-shadow: 10px 10px 0px black; max-width: 400px; line-height: 1.2; }
+    .leaderboard-list { margin-top: 15px; border-top: 3px dashed #000; padding-top: 10px; color: #E23636; font-size: 1.5rem; }
+    .epic-btn { margin-top: 30px; background: #E23636; color: white; font-family: 'Bangers', cursive; font-size: 4rem; padding: 10px 50px; border: 5px solid black; cursor: pointer; box-shadow: 8px 8px 0px black; }
+    .hit-text { position: fixed; font-size: 5rem !important; color: #FFCC00; -webkit-text-stroke: 3px black; text-shadow: 6px 6px 0px #000; pointer-events: none; z-index: 1000; }
+    #uiCoins { font-size: 3rem !important; color: #FFCC00 !important; -webkit-text-stroke: 2px black; text-shadow: 4px 4px 0px #000; }
+    @keyframes titlePop { 0% { transform: scale(0) rotate(-20deg); } 80% { transform: scale(1.1) rotate(5deg); } 100% { transform: scale(1) skew(-5deg, -5deg); } }
 `;
 document.head.appendChild(style);
 
-// --- MODAL HTML INJECTION ---
 const modalDiv = document.createElement("div");
 modalDiv.id = "comic-modal-overlay";
-modalDiv.innerHTML = `
-    <div class="comic-modal">
-        <h2 id="modal-heading">K.O.!</h2>
-        <p style="font-size: 1.5rem; margin:0;" id="modal-subtext">SAVE YOUR SCORE, HERO!</p>
-        <input type="text" id="hero-name" maxlength="10" placeholder="NAME">
-        <br>
-        <button class="submit-btn" id="submit-score-btn">SAVE POW!</button>
-    </div>
-`;
+modalDiv.innerHTML = `<div class="comic-modal"><h2 id="modal-heading">K.O.!</h2><p style="font-size: 1.5rem; margin:0;" id="modal-subtext">SAVE YOUR SCORE, HERO!</p><input type="text" id="hero-name" maxlength="10" placeholder="NAME"><br><button class="submit-btn" id="submit-score-btn">SAVE POW!</button></div>`;
 document.body.appendChild(modalDiv);
+
+// --- STATE & SECURITY VARIABLES ---
+let _s = 0,
+  _v_t = 0; // score and start time
+let isGameOver = true,
+  bagState = "neutral",
+  stateTimer = 0;
+let _d = 1.0,
+  isStumbled = false,
+  bagZ = 0;
+const MAX_Z = 25;
+let nextPunchIsLeft = true,
+  lastPunchTime = 0;
+const PUNCH_COOLDOWN = 200;
 
 // --- LEADERBOARD LOGIC ---
 async function loadLeaderboard() {
@@ -161,18 +51,19 @@ async function loadLeaderboard() {
     const response = await fetch(SCRIPT_URL + "?nocache=" + Date.now());
     const top3 = await response.json();
     const rulesBox = document.querySelector(".epic-rules");
-
     if (top3 && top3.length > 0) {
-      let leaderHtml = `<div class="leaderboard-list">`;
-      leaderHtml += `<strong>WORLD LEADERS:</strong><br>`;
+      const container = document.createElement("div");
+      container.className = "leaderboard-list";
+      container.innerHTML = "<strong>WORLD LEADERS:</strong><br>";
       top3.forEach((entry, i) => {
-        leaderHtml += `${i + 1}. ${entry.name} - ${entry.score}<br>`;
+        const row = document.createElement("div");
+        row.textContent = `${i + 1}. ${entry.name} - ${entry.score}`; // SECURITY: textContent prevents button injection
+        container.appendChild(row);
       });
-      leaderHtml += `</div>`;
-      rulesBox.innerHTML += leaderHtml;
+      rulesBox.appendChild(container);
     }
   } catch (e) {
-    console.log("Leaderboard: Awaiting data...");
+    console.log("Board loading...");
   }
 }
 
@@ -181,25 +72,27 @@ function checkWorldRecord(playerScore) {
     location.reload();
     return;
   }
-  const overlay = document.getElementById("comic-modal-overlay");
-  const submitBtn = document.getElementById("submit-score-btn");
-  const nameInput = document.getElementById("hero-name");
-  const heading = document.getElementById("modal-heading");
+  document.getElementById("modal-heading").innerText = "SCORE: " + playerScore;
+  document.getElementById("comic-modal-overlay").style.display = "flex";
 
-  heading.innerText = "SCORE: " + playerScore;
-  overlay.style.display = "flex";
-
-  submitBtn.onclick = async () => {
-    const name = nameInput.value.trim().toUpperCase();
+  document.getElementById("submit-score-btn").onclick = async () => {
+    const name = document
+      .getElementById("hero-name")
+      .value.trim()
+      .toUpperCase();
     if (!name) return;
-    submitBtn.innerText = "SAVING...";
-    submitBtn.disabled = true;
+    document.getElementById("submit-score-btn").innerText = "SAVING...";
+    document.getElementById("submit-score-btn").disabled = true;
     try {
       await fetch(SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, score: playerScore }),
+        body: JSON.stringify({
+          name: name,
+          score: playerScore,
+          startTime: _v_t,
+          key: _SEC_K,
+        }),
       });
       setTimeout(() => location.reload(), 500);
     } catch (e) {
@@ -216,44 +109,19 @@ const isMobileDevice =
   "ontouchstart" in window ||
   navigator.maxTouchPoints > 0;
 const controlText = isMobileDevice ? "THRUST TO STRIKE!" : "CLICK TO STRIKE!";
-
 const startScreenEl = document.getElementById("start-screen");
 if (startScreenEl) {
-  startScreenEl.innerHTML = `
-        <h1 class="epic-title">3D<br>PUNCH</h1>
-        <div class="epic-rules">
-            <span style="color: #2979FF;">●</span> BLUE: NEUTRAL<br>
-            <span style="color: #FFCC00;">●</span> YELLOW: <strong style="text-decoration: underline;">STOP!</strong><br>
-            <span style="color: #E23636;">●</span> RED: <strong>COUNTER NOW!</strong><br>
-            <br>
-            <small style="font-size: 1rem;">${controlText}</small>
-        </div>
-        <button class="epic-btn" onclick="initGame()">POW!</button>
-    `;
+  startScreenEl.innerHTML = `<h1 class="epic-title">3D<br>PUNCH</h1><div class="epic-rules"><span style="color: #2979FF;">●</span> BLUE: NEUTRAL<br><span style="color: #FFCC00;">●</span> YELLOW: <strong style="text-decoration: underline;">STOP!</strong><br><span style="color: #E23636;">●</span> RED: <strong>COUNTER NOW!</strong><br><br><small style="font-size: 1rem;">${controlText}</small></div><button class="epic-btn" onclick="initGame()">POW!</button>`;
   loadLeaderboard();
 }
 
-// --- THREE.JS & GAME ENGINE ---
-let score = 0,
-  isGameOver = true,
-  bagState = "neutral",
-  stateTimer = 0;
-let difficultyMultiplier = 1.0,
-  isStumbled = false,
-  bagZ = 0;
-const MAX_Z = 25;
-let nextPunchIsLeft = true,
-  lastPunchTime = 0;
-const PUNCH_COOLDOWN = 200;
-
+// --- THREE.JS ENGINE ---
 const uiCoins = document.getElementById("uiCoins");
 const dangerFill = document.getElementById("danger-bar-fill");
-
 const container = document.getElementById("canvas-container");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x2c3e50);
 scene.fog = new THREE.Fog(0x2c3e50, 30, 80);
-
 const camera = new THREE.PerspectiveCamera(
   85,
   window.innerWidth / window.innerHeight,
@@ -261,16 +129,12 @@ const camera = new THREE.PerspectiveCamera(
   1000,
 );
 camera.position.set(0, -2, 38);
-
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambientLight);
-
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 const spotLight = new THREE.SpotLight(0xffffff, 1);
 spotLight.position.set(0, 30, 20);
 spotLight.angle = Math.PI / 4;
@@ -278,90 +142,73 @@ spotLight.penumbra = 0.5;
 spotLight.castShadow = true;
 scene.add(spotLight);
 
-// Environment
-const floorGeo = new THREE.PlaneGeometry(120, 120);
-const floorMat = new THREE.MeshToonMaterial({ color: 0xd35400 });
-const floor = new THREE.Mesh(floorGeo, floorMat);
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(120, 120),
+  new THREE.MeshToonMaterial({ color: 0xd35400 }),
+);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -15;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const wallGeo = new THREE.PlaneGeometry(120, 60);
-const wallMat = new THREE.MeshToonMaterial({ color: 0x7f8c8d });
-const wall = new THREE.Mesh(wallGeo, wallMat);
+const wall = new THREE.Mesh(
+  new THREE.PlaneGeometry(120, 60),
+  new THREE.MeshToonMaterial({ color: 0x7f8c8d }),
+);
 wall.position.set(0, 10, -30);
-wall.receiveShadow = true;
 scene.add(wall);
 
-const trackGeo = new THREE.BoxGeometry(2, 0.5, 60);
-const trackMat = new THREE.MeshToonMaterial({ color: 0x555555 });
-const track = new THREE.Mesh(trackGeo, trackMat);
+const track = new THREE.Mesh(
+  new THREE.BoxGeometry(2, 0.5, 60),
+  new THREE.MeshToonMaterial({ color: 0x555555 }),
+);
 track.position.set(0, 12.5, 10);
 scene.add(track);
 
-// The Bag
 const pivot = new THREE.Group();
 pivot.position.y = 12;
 scene.add(pivot);
-
-const ropeGeo = new THREE.CylinderGeometry(0.1, 0.1, 8, 8);
-const ropeMat = new THREE.MeshToonMaterial({ color: 0x222222 });
-const rope = new THREE.Mesh(ropeGeo, ropeMat);
+const rope = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.1, 0.1, 8, 8),
+  new THREE.MeshToonMaterial({ color: 0x222222 }),
+);
 rope.position.y = -4;
 pivot.add(rope);
 
 const bagGroup = new THREE.Group();
 bagGroup.position.y = -13;
 pivot.add(bagGroup);
-
 const bagMat = new THREE.MeshToonMaterial({ color: 0x3498db });
-const bodyGeo = new THREE.CylinderGeometry(3, 3, 7, 16);
-const bodyMesh = new THREE.Mesh(bodyGeo, bagMat);
+const bodyMesh = new THREE.Mesh(
+  new THREE.CylinderGeometry(3, 3, 7, 16),
+  bagMat,
+);
 bodyMesh.castShadow = true;
-
-const topHemiGeo = new THREE.SphereGeometry(
-  3,
-  16,
-  8,
-  0,
-  Math.PI * 2,
-  0,
-  Math.PI / 2,
+const topHemi = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+  bagMat,
 );
-const topHemi = new THREE.Mesh(topHemiGeo, bagMat);
 topHemi.position.y = 3.5;
-
-const botHemiGeo = new THREE.SphereGeometry(
-  3,
-  16,
-  8,
-  0,
-  Math.PI * 2,
-  Math.PI / 2,
-  Math.PI / 2,
+const botHemi = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+  bagMat,
 );
-const botHemi = new THREE.Mesh(botHemiGeo, bagMat);
 botHemi.position.y = -3.5;
-
 bagGroup.add(bodyMesh, topHemi, botHemi);
 
-// Gloves
-const leftGlove = new THREE.Group();
-const rightGlove = new THREE.Group();
-const leftRest = new THREE.Vector3(-2.8, -5.5, -10);
-const rightRest = new THREE.Vector3(2.8, -5.5, -10);
+const leftGlove = new THREE.Group(),
+  rightGlove = new THREE.Group();
+const leftRest = new THREE.Vector3(-2.8, -5.5, -10),
+  rightRest = new THREE.Vector3(2.8, -5.5, -10);
 leftGlove.position.copy(leftRest);
 rightGlove.position.copy(rightRest);
 camera.add(leftGlove);
 camera.add(rightGlove);
 scene.add(camera);
 
-const leftGloveMat = new THREE.MeshToonMaterial({ color: 0xe74c3c });
-const rightGloveMat = new THREE.MeshToonMaterial({ color: 0xe74c3c });
-
-function createGloveMesh(mat, isLeft) {
+function createGloveMesh(isLeft) {
   const group = new THREE.Group();
+  const mat = new THREE.MeshToonMaterial({ color: 0xe74c3c });
   const fist = new THREE.Mesh(new THREE.SphereGeometry(1.8, 16, 16), mat);
   fist.scale.set(1, 1.2, 1.3);
   const cuff = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.5, 2, 16), mat);
@@ -373,10 +220,9 @@ function createGloveMesh(mat, isLeft) {
   group.add(fist, cuff, thumb);
   return group;
 }
-leftGlove.add(createGloveMesh(leftGloveMat, true));
-rightGlove.add(createGloveMesh(rightGloveMat, false));
+leftGlove.add(createGloveMesh(true));
+rightGlove.add(createGloveMesh(false));
 
-// Input Handling
 function handleMotion(event) {
   if (isGameOver) return;
   let accZ = event.acceleration.z;
@@ -393,14 +239,15 @@ function handleMotion(event) {
 
 window.initGame = async function () {
   isGameOver = false;
-  document.getElementById("start-screen").style.display = "none";
   bagZ = 0;
-  score = 0;
-  difficultyMultiplier = 1.0;
+  _s = 0;
+  _d = 1.0;
+  _v_t = Date.now();
   bagState = "neutral";
   isStumbled = false;
   stateTimer = Date.now() + 1500;
   uiCoins.innerText = "SCORE: 0";
+  document.getElementById("start-screen").style.display = "none";
   updateDangerBar();
   if (
     isMobileDevice &&
@@ -408,10 +255,10 @@ window.initGame = async function () {
     typeof DeviceMotionEvent.requestPermission === "function"
   ) {
     try {
-      const permissionState = await DeviceMotionEvent.requestPermission();
-      if (permissionState === "granted")
+      const p = await DeviceMotionEvent.requestPermission();
+      if (p === "granted")
         window.addEventListener("devicemotion", handleMotion);
-    } catch (error) {}
+    } catch (e) {}
   } else if (isMobileDevice) {
     window.addEventListener("devicemotion", handleMotion);
   }
@@ -420,15 +267,13 @@ window.initGame = async function () {
 function triggerGameOver() {
   isGameOver = true;
   window.removeEventListener("devicemotion", handleMotion);
-  checkWorldRecord(score);
+  checkWorldRecord(_s);
 }
-
 function updateDangerBar() {
   let p = (bagZ / MAX_Z) * 100;
   dangerFill.style.width = Math.min(p, 100) + "%";
-  if (p > 80) dangerFill.style.background = "#E23636";
-  else if (p > 50) dangerFill.style.background = "#FFCC00";
-  else dangerFill.style.background = "#2ecc71";
+  dangerFill.style.background =
+    p > 80 ? "#E23636" : p > 50 ? "#FFCC00" : "#2ecc71";
 }
 
 function triggerPunchAnim(side, clientX, clientY) {
@@ -436,14 +281,14 @@ function triggerPunchAnim(side, clientX, clientY) {
   isPunching = true;
   punchProgress = 0;
   activeGlove = side === "left" ? leftGlove : rightGlove;
-  let dynamicZTarget = -20 + bagZ;
+  let dz = -20 + bagZ;
   if (side === "left") {
-    punchTarget.set(1.5, 2, dynamicZTarget);
+    punchTarget.set(1.5, 2, dz);
     targetPunchRot.set(0.5, -0.5, Math.PI / 3);
     velX += 0.4;
     velZ -= 0.3;
   } else {
-    punchTarget.set(-1.5, 2, dynamicZTarget);
+    punchTarget.set(-1.5, 2, dz);
     targetPunchRot.set(0.5, 0.5, -Math.PI / 3);
     velX -= 0.4;
     velZ -= 0.3;
@@ -455,14 +300,14 @@ function checkHit(clientX, clientY) {
   if (isGameOver) return;
   scaleTarget = 0.6;
   if (bagState === "attack") {
-    score++;
-    uiCoins.innerText = "SCORE: " + score;
+    _s++;
+    uiCoins.innerText = "SCORE: " + _s;
     bagZ -= 13;
     bagState = "stunned";
     stateTimer = Date.now() + 600;
     bagMat.color.setHex(0xffffff);
     spawnText("BOOM!", "#FFCC00", clientX, clientY);
-    difficultyMultiplier += 0.15;
+    _d += 0.15;
   } else if (bagState === "warning") {
     bagZ += 9;
     isStumbled = true;
@@ -499,21 +344,21 @@ function spawnText(msg, color, clientX, clientY) {
 function manageBagAI() {
   let now = Date.now();
   if (bagState === "neutral") {
-    bagZ += 0.025 * difficultyMultiplier;
+    bagZ += 0.025 * _d;
     bagMat.color.setHex(0x3498db);
     if (now > stateTimer) {
       bagState = "warning";
       bagMat.color.setHex(0xf1c40f);
-      stateTimer = now + Math.max(350, 800 - score * 20);
+      stateTimer = now + Math.max(350, 800 - _s * 20);
     }
   } else if (bagState === "warning") {
     if (now > stateTimer) {
       bagState = "attack";
       bagMat.color.setHex(0xe74c3c);
-      stateTimer = now + Math.max(250, 600 - score * 15);
+      stateTimer = now + Math.max(250, 600 - _s * 15);
     }
   } else if (bagState === "attack") {
-    bagZ += 0.5 * difficultyMultiplier;
+    bagZ += 0.5 * _d;
     if (now > stateTimer) {
       bagState = "neutral";
       stateTimer = now + 1000 + Math.random() * 2000;
@@ -543,17 +388,14 @@ let activeGlove = null,
 function animate(currentTime) {
   requestAnimationFrame(animate);
   const deltaTime = currentTime - lastFrameTime;
-
   if (deltaTime > fpsInterval) {
     lastFrameTime = currentTime - (deltaTime % fpsInterval);
-
     if (!isGameOver) {
       manageBagAI();
       pivot.position.z = bagZ;
       updateDangerBar();
       if (bagZ >= MAX_Z) triggerGameOver();
     }
-
     if (isPunching && activeGlove) {
       punchProgress += 0.15;
       let restPos = activeGlove === leftGlove ? leftRest : rightRest;
@@ -567,21 +409,18 @@ function animate(currentTime) {
         isPunching = false;
       }
     }
-
     velX += (0 - pivot.rotation.x) * spring;
     velZ += (0 - pivot.rotation.z) * spring;
     velX *= friction;
     velZ *= friction;
     pivot.rotation.x += velX;
     pivot.rotation.z += velZ;
-
     scaleTarget += (1 - scaleTarget) * 0.2;
     bagGroup.scale.set(
       1 + (1 - scaleTarget) * 0.5,
       scaleTarget,
       1 + (1 - scaleTarget) * 0.5,
     );
-
     renderer.render(scene, camera);
   }
 }
